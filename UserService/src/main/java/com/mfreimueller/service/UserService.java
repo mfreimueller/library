@@ -35,7 +35,7 @@ public class UserService {
         Assert.notNull(createUserDto, "createUserDto must not be null.");
 
         val user = new User(null, createUserDto.firstName(), createUserDto.lastName(), createUserDto.email(),
-                createUserDto.username(), createUserDto.password(), createUserDto.birthday(), null);
+                createUserDto.birthday(), null);
 
         return conversionService.convert(userRepository.save(user), UserDto.class);
     }

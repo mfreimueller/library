@@ -19,9 +19,6 @@ public class User {
     private String lastName;
 
     private String email;
-    private String username;
-
-    private String password;
 
     @Temporal(TemporalType.DATE)
     private LocalDate birthday;

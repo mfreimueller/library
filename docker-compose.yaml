@@ -1,0 +1,101 @@
+version: "3.8"
+
+services:
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config-repo:/config-repo
+    environment:
+      - SPRING_PROFILES_ACTIVE=native
+      - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:/config-repo
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    depends_on:
+      - config-server
+    ports:
+      - "8761:8761"
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    depends_on:
+      - config-server
+      - eureka-server
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+
+  user-db:
+    image: mariadb
+    container_name: user-db
+    environment:
+      MYSQL_DATABASE: users
+      MYSQL_USER: useruser
+      MYSQL_PASSWORD: userpass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3307:3306"
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    depends_on:
+      - user-db
+      - eureka-server
+      - config-server
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+
+  book-db:
+    image: mysql:8
+    container_name: book-db
+    environment:
+      MYSQL_DATABASE: books
+      MYSQL_USER: bookuser
+      MYSQL_PASSWORD: bookpass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3308:3306"
+
+  book-service:
+    build: ./book-service
+    container_name: book-service
+    depends_on:
+      - book-db
+      - eureka-server
+      - config-server
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+
+  borrow-db:
+    image: mysql:8
+    container_name: borrow-db
+    environment:
+      MYSQL_DATABASE: borrows
+      MYSQL_USER: borrowuser
+      MYSQL_PASSWORD: borrowpass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3309:3306"
+
+  borrow-service:
+    build: ./borrow-service
+    container_name: borrow-service
+    depends_on:
+      - borrow-db
+      - eureka-server
+      - config-server
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888

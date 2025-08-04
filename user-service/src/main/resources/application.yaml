@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: user-service
+
+  cloud:
+    config:
+      name: user-service
+
+  config:
+    import: configserver:http://config-server:8888

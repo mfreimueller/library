@@ -1,4 +1,4 @@
-package com.mfreimueller.clients;
+package com.mfreimueller.client;
 
 import com.mfreimueller.dto.BookDto;
 import org.springframework.cloud.openfeign.FeignClient;

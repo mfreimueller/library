@@ -1,7 +1,7 @@
 package com.mfreimueller.service;
 
-import com.mfreimueller.clients.BookClient;
-import com.mfreimueller.clients.UserClient;
+import com.mfreimueller.client.BookClient;
+import com.mfreimueller.client.UserClient;
 import com.mfreimueller.domain.BorrowedBook;
 import com.mfreimueller.dto.BookDto;
 import com.mfreimueller.dto.BorrowedBookDto;

@@ -25,4 +25,7 @@ public class User {
 
     @Temporal(TemporalType.DATE)
     private LocalDate birthday;
+
+    @Temporal(TemporalType.DATE)
+    private LocalDate deletedAt;
 }

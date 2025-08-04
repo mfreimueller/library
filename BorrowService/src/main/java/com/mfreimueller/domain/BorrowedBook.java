@@ -10,19 +10,17 @@ import java.time.LocalDate;
 
 @Entity
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public class User {
+public class BorrowedBook {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String firstName;
-    private String lastName;
-
-    private String email;
-    private String username;
-
-    private String password;
+    private Long bookId;
+    private Long userId;
 
     @Temporal(TemporalType.DATE)
-    private LocalDate birthday;
+    private LocalDate borrowedAt;
+
+    @Temporal(TemporalType.DATE)
+    private LocalDate returnedAt;
 }

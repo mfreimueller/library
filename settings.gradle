@@ -1,3 +1,4 @@
 rootProject.name = 'library'
 
 include 'ConfigServer'
+include 'EurekaServer'

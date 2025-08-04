@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: global-config
+
+  cloud:
+    config:
+      enabled: true
+
+logging:
+  level:
+    org.springframework: INFO

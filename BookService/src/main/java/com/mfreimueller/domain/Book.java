@@ -13,18 +13,18 @@ import java.time.LocalDate;
 
 @Entity
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public class User {
+public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String firstName;
-    private String lastName;
+    private String isbn;
+    private String edition;
 
-    private String email;
-    private String username;
+    private String title;
+    private String author;
 
-    private String password;
+    private Integer year;
 
-    private LocalDate birthday;
+    private String genre;
 }

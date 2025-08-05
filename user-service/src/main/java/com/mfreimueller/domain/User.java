@@ -25,4 +25,9 @@ public class User {
 
     @Temporal(TemporalType.DATE)
     private LocalDate deletedAt;
+
+    /// Returns true iff the deletedAt timestamp isn't set (i.e. is null).
+    public boolean isActive() {
+        return deletedAt == null;
+    }
 }

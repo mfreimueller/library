@@ -78,7 +78,7 @@ services:
       - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
 
   borrow-db:
-    image: mysql:8
+    image: mariadb
     container_name: borrow-db
     environment:
       MYSQL_DATABASE: borrows

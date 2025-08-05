@@ -2,6 +2,10 @@ spring:
   application:
     name: borrowed-service
 
+  cloud:
+    config:
+      name: borrowed-service
+
   config:
     import: configserver:http://config-server:8888
 

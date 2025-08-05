@@ -7,6 +7,7 @@ import com.mfreimueller.dto.BookDto;
 import com.mfreimueller.dto.BorrowedBookDto;
 import com.mfreimueller.dto.UserDto;
 import com.mfreimueller.repository.BorrowedBookRepository;
+import jakarta.transaction.Transactional;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
@@ -69,6 +70,7 @@ public class BorrowService {
         return conversionService.convert(borrowedBookRepository.save(borrowed), BorrowedBookDto.class);
     }
 
+    @Transactional()
     public List<BorrowedBookDto> getAllBorrowedBooksOfUser(Long userId) {
         return borrowedBookRepository.findAllByUserId(userId)
                 .map(bb -> conversionService.convert(bb, BorrowedBookDto.class))

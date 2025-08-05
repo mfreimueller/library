@@ -2,6 +2,10 @@ spring:
   application:
     name: book-service
 
+  cloud:
+    config:
+      name: book-service
+
   config:
     import: configserver:http://config-server:8888
 

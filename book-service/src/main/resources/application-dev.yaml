@@ -2,13 +2,10 @@ server:
   port: 8082
 
 spring:
-  application:
-    name: user-service
-
   datasource:
-    url: jdbc:mariadb://user-db:3306/users
-    username: useruser
-    password: userpass
+    url: jdbc:mysql://localhost:3308/books
+    username: bookuser
+    password: bookpass
     driver-class-name: org.mariadb.jdbc.Driver
 
   jpa:
@@ -16,7 +13,11 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  cloud:
+    config:
+      enabled: false
+
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: http://localhost:8761/eureka

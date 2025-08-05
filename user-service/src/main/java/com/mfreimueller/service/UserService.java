@@ -27,6 +27,7 @@ public class UserService {
     public List<UserDto> getAllUsers() {
         return userRepository.findAll()
                 .stream()
+                .filter(User::isActive)
                 .map(u -> conversionService.convert(u, UserDto.class))
                 .collect(Collectors.toList());
     }

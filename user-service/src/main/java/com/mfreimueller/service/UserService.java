@@ -13,7 +13,10 @@ import org.springframework.util.Assert;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static java.util.function.Predicate.not;
 
 @Service
 public class UserService {
@@ -24,10 +27,27 @@ public class UserService {
     @Autowired
     private ConversionService conversionService;
 
+    public UserDto getUser(Long userId) {
+        return userRepository.findById(userId)
+                .filter(User::isActive)
+                .map(u -> conversionService.convert(u, UserDto.class))
+                .orElseThrow();
+    }
+
     public List<UserDto> getAllUsers() {
+        return getAllWithFilterPredicate(User::isActive);
+    }
+
+    public List<UserDto> getAllDeletedUsers() {
+        return getAllWithFilterPredicate(not(User::isActive));
+    }
+
+    private List<UserDto> getAllWithFilterPredicate(Predicate<User> predicate) {
+        Assert.notNull(predicate, "predicate must not be null.");
+
         return userRepository.findAll()
                 .stream()
-                .filter(User::isActive)
+                .filter(predicate)
                 .map(u -> conversionService.convert(u, UserDto.class))
                 .collect(Collectors.toList());
     }

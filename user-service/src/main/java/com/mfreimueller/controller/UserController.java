@@ -15,12 +15,18 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @GetMapping("/{userId}")
+    public UserDto getUser(@PathVariable Long userId) { return userService.getUser(userId); }
+
     /// Returns a list of all active users. This method
     /// excludes any deleted users.
     @GetMapping
     public List<UserDto> getAllUsers() {
         return userService.getAllUsers();
     }
+
+    @GetMapping("/deleted")
+    public List<UserDto> getAllDeletedUsers() { return userService.getAllDeletedUsers(); }
 
     @PostMapping
     public UserDto createUser(@Valid @RequestBody CreateUserDto createUserDto) {

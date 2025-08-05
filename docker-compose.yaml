@@ -55,7 +55,7 @@ services:
       - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
 
   book-db:
-    image: mysql:8
+    image: mariadb
     container_name: book-db
     environment:
       MYSQL_DATABASE: books

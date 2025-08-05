@@ -3,9 +3,9 @@ package com.mfreimueller.service;
 import com.mfreimueller.client.BookClient;
 import com.mfreimueller.client.UserClient;
 import com.mfreimueller.domain.BorrowedBook;
-import com.mfreimueller.dto.BookDto;
 import com.mfreimueller.dto.BorrowedBookDto;
-import com.mfreimueller.dto.UserDto;
+import com.mfreimueller.exception.EntityNotFoundException;
+import com.mfreimueller.exception.InvalidStateException;
 import com.mfreimueller.repository.BorrowedBookRepository;
 import jakarta.transaction.Transactional;
 import lombok.val;
@@ -34,25 +34,21 @@ public class BorrowService {
     /// - the user still has some borrowed books outstanding and missed their deadline (tbd), or
     /// - the user fails to satisfy the books age requirement (tbd).
     public BorrowedBookDto borrowBook(Long userId, Long bookId) {
-        UserDto user;
-        BookDto book;
-
         try {
-            user = userClient.getUserById(userId);
+            userClient.getUserById(userId);
         } catch (Exception ex) {
-            // TODO: log & throw exception
+            throw new EntityNotFoundException(userId, "User");
         }
 
         try {
-            book = bookClient.getBookById(bookId);
+            bookClient.getBookById(bookId);
         } catch (Exception ex) {
-            // TODO: log & throw exception
+            throw new EntityNotFoundException(bookId, "book");
         }
 
         val borrowed = borrowedBookRepository.findByBookId(bookId);
         if (borrowed != null) {
-            // TODO: log & throw exception
-            return null;
+            throw new InvalidStateException(bookId, "The book has already been borrowed by user %d".formatted(borrowed.getUserId()));
         }
 
         val borrow = new BorrowedBook(null, bookId, userId, LocalDate.now(), null);
@@ -62,8 +58,7 @@ public class BorrowService {
     public BorrowedBookDto returnBorrowedBook(Long userId, Long bookId) {
         val borrowed = borrowedBookRepository.findByUserIdAndBookId(userId, bookId);
         if (borrowed == null) {
-            // TODO: log & throw exception
-            return null;
+            throw new InvalidStateException(bookId, "The book has not been borrowed by user %d".formatted(userId));
         }
 
         borrowed.setReturnedAt(LocalDate.now());

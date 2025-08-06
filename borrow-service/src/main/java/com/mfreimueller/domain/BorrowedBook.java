@@ -15,7 +15,7 @@ public class BorrowedBook {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long bookId;
+    private String isbn;
     private Long userId;
 
     @Temporal(TemporalType.DATE)

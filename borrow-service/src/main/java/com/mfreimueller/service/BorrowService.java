@@ -6,16 +6,16 @@ import com.mfreimueller.domain.BorrowedBook;
 import com.mfreimueller.dto.BorrowedBookDto;
 import com.mfreimueller.exception.EntityNotFoundException;
 import com.mfreimueller.exception.InvalidStateException;
+import com.mfreimueller.mapper.BorrowedBookMapper;
 import com.mfreimueller.repository.BorrowedBookRepository;
 import jakarta.transaction.Transactional;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class BorrowService {
@@ -26,49 +26,52 @@ public class BorrowService {
     @Autowired
     private BorrowedBookRepository borrowedBookRepository;
     @Autowired
-    private ConversionService conversionService;
+    private BorrowedBookMapper borrowedBookMapper;
 
     /// Attempt to borrow a book by a user. This method can fail for various reasons:
     /// - Either the user or the book don't exist, or
     /// - the book in question is already borrowed, or
     /// - the user still has some borrowed books outstanding and missed their deadline (tbd), or
     /// - the user fails to satisfy the books age requirement (tbd).
-    public BorrowedBookDto borrowBook(Long userId, Long bookId) {
+    public BorrowedBookDto borrowBook(Long userId, String isbn) {
+        Assert.notNull(userId, "userId must not be null.");
+        Assert.notNull(isbn, "isbn must not be null.");
+
         try {
             userClient.getUserById(userId);
         } catch (Exception ex) {
-            throw new EntityNotFoundException(userId, "User");
+            throw new EntityNotFoundException(userId.toString(), "User");
         }
 
         try {
-            bookClient.getBookById(bookId);
+            bookClient.getBookByIsbn(isbn);
         } catch (Exception ex) {
-            throw new EntityNotFoundException(bookId, "book");
+            throw new EntityNotFoundException(isbn, "book");
         }
 
-        val borrowed = borrowedBookRepository.findByBookId(bookId);
-        if (borrowed != null) {
-            throw new InvalidStateException(bookId, "The book has already been borrowed by user %d".formatted(borrowed.getUserId()));
+        val borrowed = borrowedBookRepository.findByIsbn(isbn);
+        if (borrowed.isPresent()) {
+            throw new InvalidStateException(isbn, "The book has already been borrowed by user %d".formatted(borrowed.get().getUserId()));
         }
 
-        val borrow = new BorrowedBook(null, bookId, userId, LocalDate.now(), null);
-        return conversionService.convert(borrowedBookRepository.save(borrow), BorrowedBookDto.class);
+        val borrow = new BorrowedBook(null, isbn, userId, LocalDate.now(), null);
+        return borrowedBookMapper.toDto(borrowedBookRepository.save(borrow));
     }
 
-    public BorrowedBookDto returnBorrowedBook(Long userId, Long bookId) {
-        val borrowed = borrowedBookRepository.findByUserIdAndBookId(userId, bookId);
-        if (borrowed == null) {
-            throw new InvalidStateException(bookId, "The book has not been borrowed by user %d".formatted(userId));
-        }
-
+    public BorrowedBookDto returnBorrowedBook(Long userId, String isbn) {
+        val borrowed = borrowedBookRepository.findByUserIdAndIsbn(userId, isbn).orElseThrow();
         borrowed.setReturnedAt(LocalDate.now());
-        return conversionService.convert(borrowedBookRepository.save(borrowed), BorrowedBookDto.class);
+
+        return borrowedBookMapper.toDto(borrowedBookRepository.save(borrowed));
     }
 
     @Transactional()
     public List<BorrowedBookDto> getAllBorrowedBooksOfUser(Long userId) {
         return borrowedBookRepository.findAllByUserId(userId)
-                .map(bb -> conversionService.convert(bb, BorrowedBookDto.class))
-                .collect(Collectors.toList());
+                .map(borrowedBookMapper::toDto).toList();
+    }
+
+    public BorrowedBookDto getAllBorrowedBookForIsbn(String isbn) {
+        return borrowedBookRepository.findByIsbn(isbn).map(borrowedBookMapper::toDto).orElseThrow();
     }
 }

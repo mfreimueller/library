@@ -1,13 +1,11 @@
 package com.mfreimueller.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.ISBN;
 
 import java.time.LocalDate;
 
@@ -15,16 +13,16 @@ import java.time.LocalDate;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Book {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @ISBN
     private String isbn;
+
     private String edition;
 
     private String title;
     private String author;
 
-    private Integer year;
+    @Temporal(TemporalType.DATE)
+    private LocalDate publishDate;
 
-    private String genre;
+    private String genre; // TODO: Maybe move genre into a separate table?
 }

@@ -1,7 +1,11 @@
 package com.mfreimueller.controller;
 
 import com.mfreimueller.domain.Book;
+import com.mfreimueller.dto.BookDto;
+import com.mfreimueller.dto.CreateBookDto;
 import com.mfreimueller.repository.BookRepository;
+import com.mfreimueller.service.BookService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,15 +20,15 @@ import java.util.List;
 @RequestMapping("/books")
 public class BookController {
     @Autowired
-    private BookRepository bookRepository;
+    private BookService bookService;
 
     @GetMapping
-    public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+    public List<BookDto> getAllBooks() {
+        return bookService.getAll();
     }
 
     @PostMapping
-    public Book createBook(@RequestBody Book book) {
-        return bookRepository.save(book);
+    public BookDto createBook(@Valid @RequestBody CreateBookDto createBookDto) {
+        return bookService.createBook(createBookDto);
     }
 }

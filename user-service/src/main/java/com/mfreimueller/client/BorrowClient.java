@@ -9,6 +9,6 @@ import java.util.List;
 
 @FeignClient(name = "borrow-service")
 public interface BorrowClient {
-    @GetMapping("/borrowings/{userId}")
+    @GetMapping("/borrowings/user/{userId}")
     List<BorrowedBookDto> getBorrowedBooksByUserId(@PathVariable Long userId);
 }

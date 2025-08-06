@@ -1,4 +1,6 @@
 package com.mfreimueller.dto;
 
-public record BookDto(String isbn, String edition, String title, String author, Integer year, String genre) {
+import java.time.LocalDate;
+
+public record BookDto(String isbn, String edition, String title, String author, LocalDate publishDate, String genre) {
 }

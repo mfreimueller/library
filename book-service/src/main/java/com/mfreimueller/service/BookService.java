@@ -2,15 +2,16 @@ package com.mfreimueller.service;
 
 import com.mfreimueller.domain.Book;
 import com.mfreimueller.dto.BookDto;
+import com.mfreimueller.dto.BookFilterDto;
 import com.mfreimueller.dto.CreateBookDto;
 import com.mfreimueller.mapper.BookMapper;
 import com.mfreimueller.repository.BookRepository;
-import jakarta.persistence.RollbackException;
-import jakarta.validation.ConstraintViolationException;
+import com.mfreimueller.repository.specifications.BookSpecification;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.ConversionService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionSystemException;
 import org.springframework.util.Assert;
 
 import java.util.List;
@@ -22,8 +23,13 @@ public class BookService {
     @Autowired
     private BookMapper bookMapper;
 
-    public List<BookDto> getAll() {
-        return bookRepository.findAll().stream().map(b -> conversionService.convert(b, BookDto.class)).toList();
+    public BookDto getOne(String isbn) {
+        return bookRepository.findByIsbn(isbn).map(bookMapper::toDto).orElseThrow();
+    }
+
+    public Page<BookDto> getAll(BookFilterDto filter, Pageable pageable) {
+        val specs = BookSpecification.fromFilter(filter);
+        return bookRepository.findAll(specs, pageable).map(bookMapper::toDto);
     }
 
     public BookDto createBook(CreateBookDto createBookDto) {

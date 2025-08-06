@@ -2,11 +2,14 @@ package com.mfreimueller.controller;
 
 import com.mfreimueller.domain.Book;
 import com.mfreimueller.dto.BookDto;
+import com.mfreimueller.dto.BookFilterDto;
 import com.mfreimueller.dto.CreateBookDto;
 import com.mfreimueller.repository.BookRepository;
 import com.mfreimueller.service.BookService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +25,12 @@ public class BookController {
     @Autowired
     private BookService bookService;
 
+    @GetMapping("/{isbn}")
+    public BookDto getBook(@PathVariable String isbn) { return bookService.getOne(isbn); }
+
     @GetMapping
-    public List<BookDto> getAllBooks() {
-        return bookService.getAll();
+    public Page<BookDto> getAllBooks(@ModelAttribute BookFilterDto filter, Pageable pageable) {
+        return bookService.getAll(filter, pageable);
     }
 
     @PostMapping

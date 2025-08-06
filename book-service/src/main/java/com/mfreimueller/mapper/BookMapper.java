@@ -6,6 +6,6 @@ import org.mapstruct.Mapper;
 import org.springframework.core.convert.converter.Converter;
 
 @Mapper(componentModel = "spring")
-public interface BookMapper extends Converter<Book, BookDto> {
+public interface BookMapper {
     BookDto toDto(Book book);
 }

@@ -3,6 +3,7 @@ package com.mfreimueller.service;
 import com.mfreimueller.domain.Book;
 import com.mfreimueller.dto.BookDto;
 import com.mfreimueller.dto.CreateBookDto;
+import com.mfreimueller.mapper.BookMapper;
 import com.mfreimueller.repository.BookRepository;
 import jakarta.persistence.RollbackException;
 import jakarta.validation.ConstraintViolationException;
@@ -19,7 +20,7 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
     @Autowired
-    private ConversionService conversionService;
+    private BookMapper bookMapper;
 
     public List<BookDto> getAll() {
         return bookRepository.findAll().stream().map(b -> conversionService.convert(b, BookDto.class)).toList();
@@ -31,6 +32,6 @@ public class BookService {
         Book book = new Book(createBookDto.isbn(), createBookDto.edition(), createBookDto.title(),
                 createBookDto.author(), createBookDto.publishDate(), createBookDto.genre());
 
-        return conversionService.convert(bookRepository.save(book), BookDto.class);
+        return bookMapper.toDto(bookRepository.save(book));
     }
 }

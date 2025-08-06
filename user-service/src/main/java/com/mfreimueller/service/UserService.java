@@ -2,8 +2,10 @@ package com.mfreimueller.service;
 
 import com.mfreimueller.client.BorrowClient;
 import com.mfreimueller.domain.User;
+import com.mfreimueller.dto.BorrowedBookDto;
 import com.mfreimueller.dto.CreateUserDto;
 import com.mfreimueller.dto.UserDto;
+import com.mfreimueller.exception.InvalidStateException;
 import com.mfreimueller.repository.UserRepository;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,14 +74,12 @@ public class UserService {
 
         var user = userRepository.findById(userId).orElseThrow();
         if (user.getDeletedAt() != null) {
-            // TODO: log & throw
-            return;
+            throw new InvalidStateException(userId.toString(), "The user has already been deleted.");
         }
 
         val borrowedBooks = borrowClient.getBorrowedBooksByUserId(userId);
-        if (!borrowedBooks.isEmpty()) {
-            // TODO: log & throw
-            return;
+        if (borrowedBooks.stream().anyMatch(BorrowedBookDto::isBorrowed)) {
+            throw new InvalidStateException(userId.toString(), "The user has borrowed at least one book.");
         }
 
         user.setDeletedAt(LocalDate.now());

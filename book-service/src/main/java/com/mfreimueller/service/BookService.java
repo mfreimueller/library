@@ -1,9 +1,10 @@
 package com.mfreimueller.service;
 
+import com.mfreimueller.client.BorrowClient;
 import com.mfreimueller.domain.Book;
-import com.mfreimueller.dto.BookDto;
-import com.mfreimueller.dto.BookFilterDto;
-import com.mfreimueller.dto.CreateBookDto;
+import com.mfreimueller.dto.*;
+import com.mfreimueller.exception.EntityNotFoundException;
+import com.mfreimueller.exception.InvalidStateException;
 import com.mfreimueller.mapper.BookMapper;
 import com.mfreimueller.repository.BookRepository;
 import com.mfreimueller.repository.specifications.BookSpecification;
@@ -14,30 +15,65 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.List;
-
 @Service
 public class BookService {
+    @Autowired
+    private BorrowClient borrowClient;
     @Autowired
     private BookRepository bookRepository;
     @Autowired
     private BookMapper bookMapper;
 
-    public BookDto getOne(String isbn) {
+    public BookDto getOne(final String isbn) {
         return bookRepository.findByIsbn(isbn).map(bookMapper::toDto).orElseThrow();
     }
 
-    public Page<BookDto> getAll(BookFilterDto filter, Pageable pageable) {
+    public Page<BookDto> getAll(final BookFilterDto filter, final Pageable pageable) {
         val specs = BookSpecification.fromFilter(filter);
         return bookRepository.findAll(specs, pageable).map(bookMapper::toDto);
     }
 
-    public BookDto createBook(CreateBookDto createBookDto) {
+    public BookDto createBook(final CreateBookDto createBookDto) {
         Assert.notNull(createBookDto, "createBookDto must not be null.");
 
         Book book = new Book(createBookDto.isbn(), createBookDto.edition(), createBookDto.title(),
                 createBookDto.author(), createBookDto.publishDate(), createBookDto.genre());
 
         return bookMapper.toDto(bookRepository.save(book));
+    }
+
+    public BookDto updateBook(final String isbn, final UpdateBookDto updateBookDto) {
+        Assert.notNull(isbn, "isbn must not be null.");
+        Assert.notNull(updateBookDto, "updateBookDto must not be null.");
+
+        var _book = bookRepository.findByIsbn(isbn);
+        if (_book.isEmpty()) {
+            throw new EntityNotFoundException(isbn, "Book");
+        }
+
+        val book = _book.get();
+
+        if (updateBookDto.edition() != null) { book.setEdition(updateBookDto.edition()); }
+        if (updateBookDto.title() != null) { book.setTitle(updateBookDto.title()); }
+        if (updateBookDto.author() != null) { book.setAuthor(updateBookDto.author()); }
+        if (updateBookDto.publishDate() != null) { book.setPublishDate(updateBookDto.publishDate()); }
+        if (updateBookDto.genre() != null) { book.setGenre(updateBookDto.genre()); }
+
+        return bookMapper.toDto(bookRepository.save(book));
+    }
+
+    /// Deletes a book identified by a ISBN.
+    /// This operation can fail if:
+    /// - the book has been borrowed by a user
+    /// - the isbn belongs to no book
+    public void deleteBook(final String isbn) {
+        Assert.notNull(isbn, "isbn must not be null.");
+
+        val borrows = borrowClient.getBorrowedBooksByBookId(isbn);
+        if (borrows.stream().anyMatch(BorrowedBookDto::isBorrowed)) {
+            throw new InvalidStateException(isbn, "The book has been borrowed by a user.");
+        }
+
+        bookRepository.deleteByIsbn(isbn);
     }
 }

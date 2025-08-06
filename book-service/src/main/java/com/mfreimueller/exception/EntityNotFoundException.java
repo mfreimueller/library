@@ -2,11 +2,11 @@ package com.mfreimueller.exception;
 
 public class EntityNotFoundException extends RuntimeException {
 
-    public EntityNotFoundException(Long id) {
+    public EntityNotFoundException(String id) {
         super("Could not find entity " + id);
     }
 
-    public EntityNotFoundException(Long id, String entity) {
+    public EntityNotFoundException(String id, String entity) {
         super("Could not find " + entity + " " + id);
     }
 

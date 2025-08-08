@@ -46,18 +46,8 @@ public class BookService {
         Assert.notNull(isbn, "isbn must not be null.");
         Assert.notNull(updateBookDto, "updateBookDto must not be null.");
 
-        var _book = bookRepository.findByIsbn(isbn);
-        if (_book.isEmpty()) {
-            throw new EntityNotFoundException(isbn, "Book");
-        }
-
-        val book = _book.get();
-
-        if (updateBookDto.edition() != null) { book.setEdition(updateBookDto.edition()); }
-        if (updateBookDto.title() != null) { book.setTitle(updateBookDto.title()); }
-        if (updateBookDto.author() != null) { book.setAuthor(updateBookDto.author()); }
-        if (updateBookDto.publishDate() != null) { book.setPublishDate(updateBookDto.publishDate()); }
-        if (updateBookDto.genre() != null) { book.setGenre(updateBookDto.genre()); }
+        var book = bookRepository.findByIsbn(isbn).orElseThrow();
+        bookMapper.updateBookFromDto(updateBookDto, book);
 
         return bookMapper.toDto(bookRepository.save(book));
     }

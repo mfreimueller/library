@@ -1,5 +1,6 @@
 package com.mfreimueller.controller;
 
+import com.mfreimueller.dto.BorrowedBookDetailsDto;
 import com.mfreimueller.dto.BorrowedBookDto;
 import com.mfreimueller.service.BorrowService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,11 @@ public class BorrowController {
     public BorrowedBookDto getBorrowedBookForIsbn(@PathVariable String isbn) {
         Assert.notNull(isbn, "userId must not be null.");
         return borrowService.getAllBorrowedBookForIsbn(isbn);
+    }
+
+    @GetMapping("/overdue")
+    public List<BorrowedBookDetailsDto> getOverdueBorrowedBooks() {
+        return borrowService.getOverdueBorrowedBooks();
     }
 
     @PutMapping("/{userId}/{isbn}")

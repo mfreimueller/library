@@ -3,9 +3,11 @@ package com.mfreimueller.service;
 import com.mfreimueller.client.BookClient;
 import com.mfreimueller.client.UserClient;
 import com.mfreimueller.domain.BorrowedBook;
+import com.mfreimueller.dto.BorrowedBookDetailsDto;
 import com.mfreimueller.dto.BorrowedBookDto;
 import com.mfreimueller.exception.EntityNotFoundException;
 import com.mfreimueller.exception.InvalidStateException;
+import com.mfreimueller.mapper.BorrowedBookDetailsMapper;
 import com.mfreimueller.mapper.BorrowedBookMapper;
 import com.mfreimueller.repository.BorrowedBookRepository;
 import jakarta.transaction.Transactional;
@@ -27,6 +29,8 @@ public class BorrowService {
     private BorrowedBookRepository borrowedBookRepository;
     @Autowired
     private BorrowedBookMapper borrowedBookMapper;
+    @Autowired
+    private BorrowedBookDetailsMapper borrowedBookDetailsMapper;
 
     /// Attempt to borrow a book by a user. This method can fail for various reasons:
     /// - Either the user or the book don't exist, or
@@ -73,5 +77,20 @@ public class BorrowService {
 
     public BorrowedBookDto getAllBorrowedBookForIsbn(String isbn) {
         return borrowedBookRepository.findByIsbn(isbn).map(borrowedBookMapper::toDto).orElseThrow();
+    }
+
+    @Transactional()
+    public List<BorrowedBookDetailsDto> getOverdueBorrowedBooks() {
+        val twoWeeksAgo = LocalDate.now().minusWeeks(2);
+
+        return borrowedBookRepository.findByReturnedAtIsNullAndBorrowedAtBefore(twoWeeksAgo)
+                .map(b -> {
+                    val user = userClient.getUserById(b.getUserId());
+                    val book = bookClient.getBookByIsbn(b.getIsbn());
+
+                    return borrowedBookDetailsMapper.toDto(b, user, book);
+                })
+                .sorted()
+                .toList();
     }
 }

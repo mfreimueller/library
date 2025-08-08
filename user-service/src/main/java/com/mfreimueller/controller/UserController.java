@@ -1,6 +1,7 @@
 package com.mfreimueller.controller;
 
 import com.mfreimueller.dto.CreateUserDto;
+import com.mfreimueller.dto.UpdateUserDto;
 import com.mfreimueller.dto.UserDto;
 import com.mfreimueller.service.UserService;
 import jakarta.validation.Valid;
@@ -31,6 +32,11 @@ public class UserController {
     @PostMapping
     public UserDto createUser(@Valid @RequestBody CreateUserDto createUserDto) {
         return userService.createUser(createUserDto);
+    }
+
+    @PutMapping("/{userId}")
+    public UserDto updateUser(@PathVariable Long userId, @Valid @RequestBody UpdateUserDto updateUserDto) {
+        return userService.updateUser(userId, updateUserDto);
     }
 
     @DeleteMapping("/{userId}")

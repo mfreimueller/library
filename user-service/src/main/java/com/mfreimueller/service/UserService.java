@@ -4,12 +4,13 @@ import com.mfreimueller.client.BorrowClient;
 import com.mfreimueller.domain.User;
 import com.mfreimueller.dto.BorrowedBookDto;
 import com.mfreimueller.dto.CreateUserDto;
+import com.mfreimueller.dto.UpdateUserDto;
 import com.mfreimueller.dto.UserDto;
 import com.mfreimueller.exception.InvalidStateException;
+import com.mfreimueller.mapper.UserMapper;
 import com.mfreimueller.repository.UserRepository;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -27,12 +28,12 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private ConversionService conversionService;
+    private UserMapper userMapper;
 
     public UserDto getUser(Long userId) {
         return userRepository.findById(userId)
                 .filter(User::isActive)
-                .map(u -> conversionService.convert(u, UserDto.class))
+                .map(userMapper::toDto)
                 .orElseThrow();
     }
 
@@ -50,7 +51,7 @@ public class UserService {
         return userRepository.findAll()
                 .stream()
                 .filter(predicate)
-                .map(u -> conversionService.convert(u, UserDto.class))
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -58,9 +59,19 @@ public class UserService {
         Assert.notNull(createUserDto, "createUserDto must not be null.");
 
         val user = new User(null, createUserDto.firstName(), createUserDto.lastName(), createUserDto.email(),
-                createUserDto.birthday(), null);
+                createUserDto.birthday(), null, null, true);
 
-        return conversionService.convert(userRepository.save(user), UserDto.class);
+        return userMapper.toDto(userRepository.save(user));
+    }
+
+    public UserDto updateUser(Long userId, UpdateUserDto updateUserDto) {
+        Assert.notNull(userId, "userId must not be null.");
+        Assert.notNull(updateUserDto, "updateUserDto must not be null.");
+
+        User user = userRepository.findById(userId).filter(User::isActive).orElseThrow();
+        userMapper.updateUserFromDto(updateUserDto, user);
+
+        return userMapper.toDto(userRepository.save(user));
     }
 
     /// Attempts to delete a user. This method fails in any of these cases:

@@ -5,6 +5,7 @@ import com.mfreimueller.client.UserClient;
 import com.mfreimueller.domain.BorrowedBook;
 import com.mfreimueller.dto.BorrowedBookDetailsDto;
 import com.mfreimueller.dto.BorrowedBookDto;
+import com.mfreimueller.dto.UserDto;
 import com.mfreimueller.exception.EntityNotFoundException;
 import com.mfreimueller.exception.InvalidStateException;
 import com.mfreimueller.mapper.BorrowedBookDetailsMapper;
@@ -41,10 +42,15 @@ public class BorrowService {
         Assert.notNull(userId, "userId must not be null.");
         Assert.notNull(isbn, "isbn must not be null.");
 
+        final UserDto user;
         try {
-            userClient.getUserById(userId);
+            user = userClient.getUserById(userId);
         } catch (Exception ex) {
             throw new EntityNotFoundException(userId.toString(), "User");
+        }
+
+        if (!user.canBorrow()) {
+            throw new InvalidStateException(user.id().toString(), "User is not allowed to borrow any books.");
         }
 
         try {

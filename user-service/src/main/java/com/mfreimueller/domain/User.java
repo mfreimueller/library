@@ -8,6 +8,14 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+/// We try to store as much information as necessary about our users, within sensible bounds, regarding the
+/// amount of data necessary to be able to reach out to users that failed to return books in time, or that
+/// damaged copies of our books.
+/// In theory, we store the birthday of users to introduce an age check when borrowing books.
+/// Additionally, we support an info-field, where library workers can store information about users, for example,
+/// to explain why the `canBorrow`-flag has been set to false, which therefor prevents users from borrowing any books.
+/// Notice, that we don't store any password or credentials. We assume, for simplicity, that our application is
+/// only used by the library workers and not the users themselves :-)
 @Entity
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class User {
